@@ -1,9 +1,11 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const multer  = require('multer');
+const tesseract = require("node-tesseract-ocr")
 
 const Sentiment = require('sentiment');
-
+  // Configura multer para guardar los archivos subidos en una carpeta 'uploads'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,9 +19,20 @@ const sentiment = new Sentiment();
 
 
 
-
-
-
+const upload = multer({ dest: 'uploads/' });
+//Subir Imagenes:
+app.post('/ocr', upload.single('image'), async (req, res) => {
+  console.log('Ruta /ocr golpeada');
+  try {
+    console.log('Archivo:', req.file);
+    const text = await tesseract.recognize(req.file.path);
+    console.log('Texto reconocido:', text);
+    res.json({ text });
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).send(error.message);
+  }
+});
 
 app.post('/api/analyze-message', async (req, res) => {
   const { message } = req.body;
