@@ -27,7 +27,12 @@ app.post('/ocr', upload.single('image'), async (req, res) => {
     console.log('Archivo:', req.file);
     const text = await tesseract.recognize(req.file.path);
     console.log('Texto reconocido:', text);
-    res.json({ text });
+    // Dividir el texto por saltos de línea y filtrar líneas vacías
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    // Mapear cada línea a un objeto con id y texto
+    const messages = lines.map((text, index) => ({ id: `msg-${index}`, text }));
+    // Enviar el array de mensajes como respuesta
+    res.json({ messages });
   } catch (error) {
     console.error('Error:', error.message);
     res.status(500).send(error.message);
